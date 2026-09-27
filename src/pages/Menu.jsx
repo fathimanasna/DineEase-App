@@ -4,11 +4,14 @@ import { useNavigate } from "react-router-dom"
 
 function Menu() {
   const [foods, setFoods] = useState([])
+  const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState("All")
   const [search, setSearch] = useState("")
   const navigate = useNavigate()
 
   useEffect(() => {
+    setLoading(true)
+
     axios
       .get("https://dineease-rrd3.onrender.com/menu")
       .then((response) => {
@@ -16,6 +19,9 @@ function Menu() {
       })
       .catch((error) => {
         console.log(error)
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }, [])
 
@@ -85,32 +91,37 @@ function Menu() {
       </div>
       <div className="food-container">
         {
-          filteredFood.length === 0 ? (
-            <div className="no-food">
-              <h3>No food found 😔</h3>
-              <p>Try searching for something else.</p>
-            </div>
-          ) : (
-            filteredFood.map((food) => (
-              <div className="food-card" key={food.id} >
-                <div className="food-image-wrapper">
-                  <img src={food.image} alt={food.name} className="food-image" />
-                  <span className="food-category">{food.category} </span>
-                </div>
-                <div className="food-card-content">
-                  <h2> {food.name} </h2>
-                  <p className="food-description"> {food.description} </p>
-                  <div className="food-bottom">
-                    <div>
-                      <span className="price-label"> Price</span>
-                      <div className="food-price"> ₹{food.price} </div>
-                    </div>
-                    <button className="order-button" onClick={() => handleOrder(food)} >Order Now<span>→</span> </button>
+        loading ? (
+          <div className="no-food">
+            <h3>Loading our delicious menu... 🍴</h3>
+            <p>Please wait a moment.</p>
+          </div>
+        ) : filteredFood.length === 0 ? (
+          <div className="no-food">
+            <h3>No food found 😔</h3>
+            <p>Try searching for something else.</p>
+          </div>
+        ) : (
+          filteredFood.map((food) => (
+            <div className="food-card" key={food.id} >
+              <div className="food-image-wrapper">
+                <img src={food.image} alt={food.name} className="food-image" />
+                <span className="food-category">{food.category} </span>
+              </div>
+              <div className="food-card-content">
+                <h2> {food.name} </h2>
+                <p className="food-description"> {food.description} </p>
+                <div className="food-bottom">
+                  <div>
+                    <span className="price-label"> Price</span>
+                    <div className="food-price"> ₹{food.price} </div>
                   </div>
+                  <button className="order-button" onClick={() => handleOrder(food)} >Order Now<span>→</span> </button>
                 </div>
               </div>
-            ))
-          )
+            </div>
+          ))
+        )
         }
       </div>
     </div>

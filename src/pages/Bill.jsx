@@ -22,39 +22,38 @@ function Bill() {
     0
   )
 
-  const generateBill = () => {
-    html2canvas(billRef.current)
-      .then((canvas) => {
-        const link = document.createElement("a")
-        link.download = "DineEase-Bill.png"
-        link.href = canvas.toDataURL("image/png")
-        link.click()
-        axios
-          .get("https://dineease-rrd3.onrender.com/cart")
-          .then((response) => {
-            const cartItems = response.data
-            const deleteRequests = cartItems.map((item) =>
-              axios.delete(`https://dineease-rrd3.onrender.com/cart/${item.id}`)
-            )
-            return Promise.all(deleteRequests)
-          })
-          .then(() => {
-            alert(
-              "Thank you for ordering from DineEase! Your bill is ready. 🍴"
-            )
-            // Go to Home
-            window.location.href = "/"
-          })
-          .catch((error) => {
-            console.log(error)
-            alert("Bill generated, but we couldn't clear your cart.")
-          })
-      })
-      .catch((error) => {
-        console.log(error)
-        alert("Sorry, we couldn't generate your bill.")
-      })
+  const generateBill = async () => {
+  try {
+    const canvas = await html2canvas(billRef.current)
+
+    const link = document.createElement("a")
+    link.download = "DineEase-Bill.png"
+    link.href = canvas.toDataURL("image/png")
+    link.click()
+
+    const response = await axios.get(
+      "https://dineease-rrd3.onrender.com/cart"
+    )
+
+    const cartItems = response.data
+
+    await Promise.all(
+      cartItems.map((item) =>
+        axios.delete(
+          `https://dineease-rrd3.onrender.com/cart/${item.id}`
+        )
+      )
+    )
+
+    alert("Thank you for ordering from DineEase! Your bill is ready. 🍴")
+
+    window.location.href = "/"
+
+  } catch (error) {
+    console.log(error)
+    alert("Sorry, something went wrong while generating your bill.")
   }
+}
 
   return (
     <div className="bill-page">
